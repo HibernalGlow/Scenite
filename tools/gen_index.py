@@ -18,6 +18,8 @@ from datetime import datetime, timezone, timedelta
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 META_DIR = os.path.join(ROOT, "metadata")
 INDEX_PATH = os.path.join(META_DIR, "index.json")
+# 同源副本，供 GitHub Pages 站点实时读取（避开 jsDelivr 缓存）
+DOCS_INDEX_PATH = os.path.join(ROOT, "docs", "assets", "index.json")
 
 try:
     from PIL import Image
@@ -82,8 +84,12 @@ def main():
     with open(INDEX_PATH, "w", encoding="utf-8") as f:
         json.dump(index, f, ensure_ascii=False, indent=2)
 
+    os.makedirs(os.path.dirname(DOCS_INDEX_PATH), exist_ok=True)
+    with open(DOCS_INDEX_PATH, "w", encoding="utf-8") as f:
+        json.dump(index, f, ensure_ascii=False, indent=2)
+
     note = " (with real dimensions)" if HAVE_PIL else " (Pillow not installed: dimensions skipped)"
-    print(f"wrote {INDEX_PATH} with {len(assets)} asset(s){note}")
+    print(f"wrote {INDEX_PATH} and {DOCS_INDEX_PATH} with {len(assets)} asset(s){note}")
 
 
 if __name__ == "__main__":
