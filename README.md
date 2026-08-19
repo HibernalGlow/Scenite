@@ -17,21 +17,31 @@
 Scenite/
 ├── README.md
 ├── .gitignore
-├── wallpapers/        # 收藏壁纸，按审美主题
-│   ├── anime/         # 二次元
-│   ├── architecture/  # 建筑
-│   ├── nature/        # 自然
-│   ├── oriental/      # 东方 / 国风
-│   ├── sci-fi/        # 科幻 / 赛博
-│   └── minimal/       # 极简 / 单色
-├── generated/         # 自己用 AI 生成的资产
-│   ├── comfyui/       # ComfyUI 工作流出图
-│   └── selected/      # 精选 / 二筛
-├── icons/             # 图标素材
-├── covers/            # 封面 / 缩略 / 卡片底图
-├── metadata/          # 元数据（每张图一份 <name>.json + 汇总 index.json）
-└── tools/             # 索引生成 / 随机切换等脚本
+├── wallpapers/            # 收藏壁纸，一级按审美主题
+│   ├── anime/             # 二次元（动画/漫画 IP），二级按作品
+│   │   ├── original/      # 原创 / 同人风，不绑定具体番
+│   │   ├── fate/
+│   │   └── evangelion/
+│   ├── game/              # 游戏美术 / CG / 宣传图，二级按游戏
+│   │   ├── arknights-endfield/
+│   │   ├── genshin/
+│   │   ├── honkai-starrail/
+│   │   └── original/
+│   ├── architecture/      # 建筑
+│   ├── nature/            # 自然
+│   ├── oriental/          # 东方 / 国风
+│   ├── sci-fi/            # 科幻 / 赛博
+│   └── minimal/           # 极简 / 单色
+├── generated/             # 自己用 AI 生成的资产
+│   ├── comfyui/           # ComfyUI 工作流出图
+│   └── selected/          # 精选 / 二筛
+├── icons/                 # 图标素材
+├── covers/                # 封面 / 缩略 / 卡片底图
+├── metadata/              # 元数据（每张图一份 <name>.json + 汇总 index.json）
+└── tools/                 # 索引生成 / 随机切换等脚本
 ```
+
+> 每个一级主题目录都可继续按 IP / 系列开二级子文件夹（如 `wallpapers/game/genshin/`）；二级目录按需创建，不必预先铺满。**`anime` 与 `game` 严格分离**：动画/漫画 IP 进 `anime/`，游戏美术/CG/宣传图进 `game/`。
 
 > 说明：你最终推荐的结构命名为 `MyVisualAssets/`，这里直接用仓库名 `Scenite` 作为库根，省掉一层无意义的嵌套。
 
@@ -45,34 +55,38 @@ IMG_39282.png
 Screenshot_2026.png
 ```
 
-✅ **推荐：** `分类-主题-主体-修饰-序号.扩展名`，全小写 kebab-case。
+✅ **推荐：** `<ip>-<主体>-<yymmdd>.<扩展名>`，全小写 kebab-case；日期用入库日期 `yymmdd`（粗一点可用 `yymm`）。
 
 ```
-arknights-wuling-city-night.webp
-anime-arknights-wuling-night-001.webp
-cyberpunk-city-rain-004.webp
-oriental-mountain-mist-012.webp
+game-arknights-endfield-rossi-260819.avif
+anime-fate-saber-260815.webp
+game-genshin-hutao-night-2608.webp
+oriental-mountain-mist-260812.webp
 ```
 
+- **anime 与 game 严格分开：** 动画/漫画 IP 进 `anime/`，游戏美术/CG/宣传图进 `game/`。
+- **二级按 IP / 系列细分：** 文件落在 `wallpapers/game/arknights-endfield/`、`wallpapers/anime/fate/` 这类目录，文件夹即二级分类。
 - 用 `-` 连接，不用空格、中文或下划线。
-- 扩展名优先 `webp`（体积小、支持无损、支持透明）。
-- 同类多张用三位序号 `-001` 收尾，方便脚本批量处理与随机切换。
+- 扩展名优先 `webp`（体积小、支持无损、支持透明）；本例 rossi 为 .avif 原格式亦可保留。
+- **日期放在末尾**（如 `-260819`），便于按时间排序与检索；同名多张用日期或三位序号区分。
 
 ## 元数据规范
 
-每张图在 `metadata/` 下配一份同名 JSON（`metadata/arknights-wuling-city-night.json`）：
+每张图在 `metadata/` 下配一份同名 JSON（`metadata/arknights-endfield-rossi-260819.json`）：
 
 ```json
 {
-  "file": "arknights-wuling-city-night.webp",
-  "path": "wallpapers/anime/arknights-wuling-city-night.webp",
-  "tags": ["arknights", "city", "night", "blue"],
+  "file": "arknights-endfield-rossi-260819.avif",
+  "path": "wallpapers/game/arknights-endfield/arknights-endfield-rossi-260819.avif",
+  "tags": ["game", "arknights", "endfield", "rossi", "character", "cg", "blue"],
   "usage": ["siyuan", "desktop"],
-  "ratio": "16:9",
-  "source": "original",
-  "notes": ""
+  "ratio": "",
+  "source": "collected",
+  "notes": "洛茜角色潜能CG图，来自《明日方舟：终末地》(Arknights: Endfield)。"
 }
 ```
+
+> `tags` 里务必带上顶层分类（`anime` / `game` / `nature` …），这样 `tools/wallpaper-api` 的 `/cat/game`、`/cat/anime` 才能按类别筛图。
 
 字段说明：
 
