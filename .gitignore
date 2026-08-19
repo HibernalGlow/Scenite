@@ -1,0 +1,12 @@
+# OS
+.DS_Store
+Thumbs.db
+ehthumbs.db
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# local notes (optional, keep out of repo)
+*.local

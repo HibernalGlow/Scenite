@@ -1,0 +1,43 @@
+{
+  "generated_at": "2026-08-19T16:55:58.832965+08:00",
+  "version": 1,
+  "count": 2,
+  "assets": [
+    {
+      "file": "anime-arknights-endfield-rossi-003.avif",
+      "path": "wallpapers/anime/anime-arknights-endfield-rossi-003.avif",
+      "tags": [
+        "arknights",
+        "endfield",
+        "rossi",
+        "character",
+        "cg",
+        "blue"
+      ],
+      "usage": [
+        "desktop",
+        "siyuan"
+      ],
+      "ratio": "",
+      "source": "collected",
+      "notes": "洛茜角色潜能CG图，来自《明日方舟：终末地》(Arknights: Endfield)。"
+    },
+    {
+      "file": "arknights-wuling-city-night.webp",
+      "path": "wallpapers/anime/arknights-wuling-city-night.webp",
+      "tags": [
+        "arknights",
+        "city",
+        "night",
+        "blue"
+      ],
+      "usage": [
+        "siyuan",
+        "desktop"
+      ],
+      "ratio": "16:9",
+      "source": "original",
+      "notes": "示例条目。实际放入壁纸后删除本文件，或替换为真实元数据。"
+    }
+  ]
+}
