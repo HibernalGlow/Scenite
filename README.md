@@ -98,6 +98,18 @@ python tools/gen_index.py
 
 > 随机选一张「夜晚 + 东方 + 二次元」背景
 
+## 动态网络壁纸 API
+
+`tools/wallpaper-api/server.mjs` 把多个「随机返回图片」的外部接口（必应 / Unsplash / imgapi / 岁月小筑…）与你自己的 Scenite 图库统一成一个本地路由：既能随机挑源，也能指定源，还能按标签随机。零依赖，Node 内置即可跑。
+
+```bash
+PORT=8787 node tools/wallpaper-api/server.mjs
+```
+
+常用路径：`/random`（随机）、`/s/anime`（指定源）、`/local`（本地库随机，走 jsDelivr）、`/cat/anime`（按标签随机）、`/p/random`（流式代理，带重试，兼容性最好）、`/json`（列源）。详情见 `tools/wallpaper-api/README.md`。
+
+直接把壁纸切换工具 / 思源背景的 URL 指向 `http://localhost:8787/random` 或 `http://localhost:8787/s/anime` 即可。
+
 ## 随机切换（思路）
 
 可在 `tools/` 下再加 `random_pick.py`：按 `tags` / `usage` / `ratio` 过滤后随机返回一条 `path`，交给壁纸切换脚本调用。索引就绪后这一步很简单。
