@@ -78,15 +78,42 @@ oriental-mountain-mist-260812.webp
 {
   "file": "arknights-endfield-rossi-260819.avif",
   "path": "wallpapers/game/arknights-endfield/arknights-endfield-rossi-260819.avif",
-  "tags": ["game", "arknights", "endfield", "rossi", "character", "cg", "blue"],
+  "tags": [
+    "game",
+    "copyright:arknights",
+    "copyright:endfield",
+    "character:rossi",
+    "cg",
+    "blue",
+    "meta:collected"
+  ],
   "usage": ["siyuan", "desktop"],
   "ratio": "",
   "source": "collected",
-  "notes": "洛茜角色潜能CG图，来自《明日方舟：终末地》(Arknights: Endfield)。"
+  "notes": "洛茜角色潜能CG图，来自《明日方舟：终末地》(Arknights: Endfield)。归入 game 而非 anime。"
 }
 ```
 
-> `tags` 里务必带上顶层分类（`anime` / `game` / `nature` …），这样 `tools/wallpaper-api` 的 `/cat/game`、`/cat/anime` 才能按类别筛图。
+### Tag 体系（Danbooru 风格）
+
+标签采用 booru 站通用的「命名空间 + 分类」模型：用 `前缀:` 区分标签类别，无前缀即 general。分类对齐 Danbooru 的 5 类标签：
+
+| 命名空间    | Danbooru 类别   | 含义                                  | 例子                                                                       |
+| ----------- | --------------- | ------------------------------------- | -------------------------------------------------------------------------- |
+| _(无前缀)_  | general (0)     | 题材 / 主体 / 色调 / 介质 / 氛围 + 顶层分类 | `game` `anime` `nature` `oriental` `sci-fi` `minimal` `architecture` `blue` `night` `cg` `landscape` |
+| `copyright:`| copyright (3)   | 系列 / IP / 作品 / 版权方             | `copyright:arknights` `copyright:fate` `copyright:genshin` `copyright:evangelion` |
+| `character:`| character (4)   | 角色                                  | `character:rossi` `character:saber` `character:hutao`                      |
+| `artist:`   | artist (1)      | 原画师 / 创作者（AI 生成填 `artist:ai`） | `artist:someone` `artist:ai`                                            |
+| `meta:`     | meta (5)        | 分级 / 来源 / 检索辅助                | `meta:safe` `meta:nsfw` `meta:collected` `meta:ai` `meta:original`        |
+
+约定：
+
+- **多词标签用下划线**：`blue_eyes`、`night_sky`、`long_hair`。
+- **顶层分类标签**（`game` / `anime` / `nature` / `oriental` / `sci-fi` / `minimal` / `architecture`）作为 general 保留，`tools/wallpaper-api` 的 `/cat/game`、`/cat/anime` 仍能按类筛图。
+- **`usage` / `ratio` / `source` 仍是独立结构化字段**（被代码读取），不要塞进 `tags`；想在标签里检索来源可用 `meta:collected` 镜像。
+- **务必带上顶层分类标签**，否则按类筛图会漏。
+
+> `/cat/<tag>` 支持命名空间精确匹配：`/cat/copyright:arknights`、`/cat/character:rossi`；多个标签用 `+` 做 AND，如 `/cat/copyright:arknights+character:rossi`；只写类别名（`/cat/copyright`）可浏览该类别全部标签。`/tags` 列出全部标签并按类别分组。
 
 字段说明：
 
@@ -94,7 +121,7 @@ oriental-mountain-mist-260812.webp
 | -------- | ------------------------------------------------------------ |
 | `file`   | 文件名                                                       |
 | `path`   | 相对仓库根的路径                                             |
-| `tags`   | 检索标签（题材 / 色调 / 主体）                               |
+| `tags`   | 检索标签（Danbooru 风格：命名空间 + general）                |
 | `usage`  | 用途：`siyuan` / `desktop` / `mobile` / `xiranite` / `cover` |
 | `ratio`  | 比例：`16:9` / `9:16` / `4:3` / `1:1`                        |
 | `source` | 来源：`original` / `ai` / `collected`                       |
@@ -120,7 +147,7 @@ python tools/gen_index.py
 PORT=8787 node tools/wallpaper-api/server.mjs
 ```
 
-常用路径：`/random`（随机）、`/s/anime`（指定源）、`/local`（本地库随机，走 jsDelivr）、`/cat/anime`（按标签随机）、`/p/random`（流式代理，带重试，兼容性最好）、`/json`（列源）。详情见 `tools/wallpaper-api/README.md`。
+常用路径：`/random`（随机）、`/s/anime`（指定源）、`/local`（本地库随机，走 jsDelivr）、`/cat/anime`（按标签随机）、`/cat/copyright:arknights`（命名空间标签）、`/cat/copyright:arknights+character:rossi`（多标签 AND）、`/cat/copyright`（浏览某类别全部标签）、`/tags`（标签按类别分组列出）、`/p/random`（流式代理，带重试，兼容性最好）、`/json`（列源）。详情见 `tools/wallpaper-api/README.md`。
 
 直接把壁纸切换工具 / 思源背景的 URL 指向 `http://localhost:8787/random` 或 `http://localhost:8787/s/anime` 即可。
 

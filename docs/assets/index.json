@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-19T17:26:31.729006+08:00",
+  "generated_at": "2026-08-19T18:17:32.002888+08:00",
   "version": 1,
   "count": 1,
   "assets": [
@@ -8,12 +8,12 @@
       "path": "wallpapers/game/arknights-endfield/arknights-endfield-rossi-260819.avif",
       "tags": [
         "game",
-        "arknights",
-        "endfield",
-        "rossi",
-        "character",
+        "copyright:arknights",
+        "copyright:endfield",
+        "character:rossi",
         "cg",
-        "blue"
+        "blue",
+        "meta:collected"
       ],
       "usage": [
         "desktop",

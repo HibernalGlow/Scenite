@@ -10,3 +10,10 @@ __pycache__/
 
 # local notes (optional, keep out of repo)
 *.local
+
+# Site (Astro) — 依赖与构建缓存不入库；docs/ 是 Pages 发布目录，需要提交
+site/node_modules/
+site/dist/
+site/.astro/
+site/.vite/
+site/.pnpm-store/

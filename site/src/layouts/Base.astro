@@ -1,0 +1,71 @@
+---
+import '../styles/global.css';
+
+const { title = 'Scenite · 视觉资产库' } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const CDN = 'https://cdn.jsdelivr.net/gh/HibernalGlow/Scenite@main/';
+---
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="dark" />
+<title>{title}</title>
+<meta name="description" content="Scenite · 个人视觉资产库：壁纸 / 生成 / 图标 / 封面，支持 CDN 与 GitHub 引用、随机与指定接口。" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='40' fill='none' stroke='%23e6b458' stroke-width='9'/%3E%3Ccircle cx='50' cy='50' r='13' fill='%23e6b458'/%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Inter:wght@400;500;600&family=Noto+Sans+SC:wght@400;500&family=Noto+Serif+SC:wght@500;600&display=swap" rel="stylesheet" />
+<script define:vars={{ base, CDN }}>
+(function () {
+  var go = new URLSearchParams(location.search).get('go');
+  if (!go) return;
+  var paint = function (msg) {
+    var el = document.createElement('div');
+    el.style.cssText = 'min-height:100vh;display:flex;align-items:center;justify-content:center;color:#a3a0ae;font:500 15px/1.6 Inter,system-ui,sans-serif;letter-spacing:.4px';
+    el.textContent = msg;
+    if (document.body) document.body.replaceChildren(el);
+  };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ paint('正在打开图片…'); });
+  else paint('正在打开图片…');
+  var grp = function (p) { var a = p.split('/'); return a[0] === 'wallpapers' ? a[1] : a[0]; };
+  var sub = function (p) { var a = p.split('/'); return a[0] === 'wallpapers' ? (a[2] || '') : (a[1] || ''); };
+  fetch(base + 'assets/index.json').then(function (r) { return r.json(); }).then(function (d) {
+    var list = d.assets || []; var pick = null; var kv = go.split(':'); var k = kv[0]; var v = kv[1];
+    if (go === 'random' && list.length) pick = list[Math.floor(Math.random() * list.length)];
+    else if ((k === 'cat' || k === 'tag') && v) {
+      var pool = list.filter(function (a) { return (a.tags || []).indexOf(v) !== -1 || grp(a.path) === v || sub(a.path) === v; });
+      if (pool.length) pick = pool[Math.floor(Math.random() * pool.length)];
+    } else if (k === 'file' && v) {
+      pick = list.filter(function (a) { return a.file === v || a.path.endsWith('/' + v); })[0];
+    }
+    if (pick) location.replace(CDN + pick.path); else paint('未找到图片');
+  }).catch(function () { paint('加载失败'); });
+})();
+</script>
+</head>
+<body>
+<header class="nav">
+  <div class="nav-in">
+    <a class="brand" href={base}>
+      <span class="dot"></span>
+      <span class="wm">Scenite</span>
+      <span class="sub">视觉资产库</span>
+    </a>
+    <nav class="links">
+      <a href={base}>图库</a>
+      <a href={base + '#api'}>接口</a>
+      <a class="gh" href="https://github.com/HibernalGlow/Scenite" target="_blank" rel="noopener">GitHub ↗</a>
+    </nav>
+  </div>
+</header>
+<slot />
+<footer class="foot">
+  <div class="foot-in">
+    <span>Scenite · 托管于 GitHub Pages · 图床走 jsDelivr</span>
+    <span>数据由 <code>tools/gen_index.py</code> 实时生成</span>
+  </div>
+</footer>
+</body>
+</html>

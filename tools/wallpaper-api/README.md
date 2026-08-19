@@ -20,7 +20,10 @@ PORT=8787 node tools/wallpaper-api/server.mjs
 | 指定外部源 | `/s/<key>` | 如 `/s/anime` `/s/bing` `/s/fengjing` |
 | 本地库随机 | `/local` | 读 `metadata/index.json`，走 jsDelivr |
 | 本地库指定 | `/local/<filename>` | 如 `/local/anime-arknights-endfield-rossi-003.avif` |
-| 按标签随机 | `/cat/<tag>` | 如 `/cat/anime` `/cat/nature` |
+| 按标签随机 | `/cat/<tag>` | 如 `/cat/anime` `/cat/nature`；支持命名空间标签 `/cat/copyright:arknights` `/cat/character:rossi` |
+| 多标签 AND | `/cat/<a>+<b>` | 如 `/cat/copyright:arknights+character:rossi`（URL 中即字面 `+`） |
+| 类别浏览 | `/cat/<category>` | `copyright` / `character` / `artist` / `meta`，如 `/cat/copyright` 浏览该类别全部标签 |
+| 标签分组 | `/tags` | 列出全部标签并按 Danbooru 类别（general/copyright/character/artist/meta）分组 |
 | 流式代理 | 前面加 `/p` | 如 `/p/random`：服务器拉图后以图片字节返回（带重试），兼容性最好 |
 | 列表 | `/json` | 列出全部源与可用 key |
 

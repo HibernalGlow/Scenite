@@ -1,7 +1,15 @@
 {
   "file": "arknights-endfield-rossi-260819.avif",
   "path": "wallpapers/game/arknights-endfield/arknights-endfield-rossi-260819.avif",
-  "tags": ["game", "arknights", "endfield", "rossi", "character", "cg", "blue"],
+  "tags": [
+    "game",
+    "copyright:arknights",
+    "copyright:endfield",
+    "character:rossi",
+    "cg",
+    "blue",
+    "meta:collected"
+  ],
   "usage": ["desktop", "siyuan"],
   "ratio": "",
   "source": "collected",

@@ -1,0 +1,23 @@
+---
+import Base from '../layouts/Base.astro';
+import App from '../components/App.svelte';
+import ApiSection from '../components/ApiSection.astro';
+
+const base = import.meta.env.BASE_URL;
+const CDN = 'https://cdn.jsdelivr.net/gh/HibernalGlow/Scenite@main/';
+const RAW = 'https://raw.githubusercontent.com/HibernalGlow/Scenite/main/';
+const BLOB = 'https://github.com/HibernalGlow/Scenite/blob/main/';
+---
+<Base title="Scenite · 视觉资产库">
+  <main class="wrap">
+    <App
+      client:load
+      base={base}
+      data={base + 'assets/index.json'}
+      cdn={CDN}
+      raw={RAW}
+      blob={BLOB}
+    />
+    <ApiSection />
+  </main>
+</Base>

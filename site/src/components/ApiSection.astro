@@ -1,0 +1,63 @@
+---
+const SITE = 'https://hibernalglow.github.io/Scenite/';
+const endpoints = [
+  ['随机一张', SITE + '?go=random'],
+  ['指定分类随机', SITE + '?go=cat:game'],
+  ['按标签随机', SITE + '?go=tag:anime'],
+  ['指定文件', SITE + '?go=file:<文件名>'],
+  ['数据 JSON', SITE + 'assets/index.json'],
+];
+---
+<section class="api wrap" id="api">
+  <p class="kick">INTERFACE</p>
+  <h2>接口 <em>Random / Specify</em></h2>
+  <p class="desc">
+    浏览之外也能用接口拿图：下面这些 URL 会在浏览器里解析后直接跳转到对应图片（基于 jsDelivr CDN）。
+    需要「直接返回图片字节 / 真·302」给非浏览器工具用时，请用本地 <code>tools/wallpaper-api</code> 服务。
+  </p>
+  <ul class="api-list">
+    {endpoints.map(([name, url]) => (
+      <li class="api-item">
+        <span class="api-name">{name}</span>
+        <code class="api-url">{url}</code>
+        <button class="copy" data-url={url}>复制</button>
+      </li>
+    ))}
+  </ul>
+  <p class="note">
+    图床前缀 <code>https://cdn.jsdelivr.net/gh/HibernalGlow/Scenite@main/&lt;path&gt;</code>
+    · GitHub Raw <code>https://raw.githubusercontent.com/HibernalGlow/Scenite/main/&lt;path&gt;</code>
+  </p>
+</section>
+
+<script>
+  document.querySelectorAll('.api .copy').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const u = btn.getAttribute('data-url') || '';
+      try { await navigator.clipboard.writeText(u); } catch (e) { /* ignore */ }
+      btn.textContent = '已复制';
+      setTimeout(() => (btn.textContent = '复制'), 1200);
+    });
+  });
+</script>
+
+<style>
+.api { padding: 30px 26px 10px; }
+.kick { color: var(--accent); letter-spacing: 3px; font-size: 0.72rem; font-weight: 600; margin: 0 0 10px; }
+.api h2 { font-family: var(--serif); font-weight: 600; font-size: clamp(1.5rem, 3vw, 2.1rem); margin: 0 0 12px; }
+.api h2 em { font-style: italic; color: var(--accent); }
+.desc { color: var(--muted); max-width: 72ch; font-size: 0.94rem; margin: 0 0 20px; }
+.api-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.api-item {
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  padding: 13px 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--card);
+}
+.api-name { font-weight: 600; font-size: 0.86rem; min-width: 96px; }
+.api-url { flex: 1; min-width: 220px; overflow: auto; white-space: nowrap; color: var(--muted); }
+.copy {
+  padding: 6px 14px; border-radius: 9px; border: 1px solid var(--line2);
+  background: transparent; color: var(--text); font-size: 0.76rem; font-weight: 600; transition: 0.16s;
+}
+.copy:hover { border-color: var(--accent); color: var(--accent); }
+.note { margin-top: 16px; font-size: 0.8rem; color: var(--faint); border-left: 2px solid var(--accent); padding-left: 12px; }
+</style>
