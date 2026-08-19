@@ -1,6 +1,6 @@
 <script>
   import { onMount } from 'svelte';
-  import { FastAverageColor } from 'fast-average-color';
+  import ColorThief from 'colorthief';
   import { accent, DEFAULT_ACCENT } from '../lib/theme.js';
 
   export let base = '/';
@@ -48,22 +48,66 @@
       const d = await res.json();
       assets = d.assets || [];
       featured = assets.length ? assets[Math.floor(Math.random() * assets.length)] : null;
+      if (featured) themeFromUrl(cdn + featured.path);
     } catch (e) {
       assets = [];
     }
     loading = false;
   });
 
-  // —— 主题色提取（fast-average-color，成熟库，不手搓）——
-  let fac;
-  function getFac() { if (!fac) fac = new FastAverageColor(); return fac; }
-  async function themeFromImage(img) {
-    if (!img) return;
-    try {
-      const c = await getFac().getColorAsync(img, { algorithm: 'dominant' });
-      setAccent(c.hex);
-    } catch (e) { /* 跨域/读取失败时保持默认色 */ }
+  // —— 主题色提取（ColorThief 调色板 + 挑最饱和色，才能抓到红斗篷这种强调色）——
+  const ct = new ColorThief();
+
+  function rgbToHsl([r, g, b]) {
+    r /= 255; g /= 255; b /= 255;
+    const mx = Math.max(r, g, b), mn = Math.min(r, g, b);
+    const l = (mx + mn) / 2;
+    let h = 0, s = 0;
+    const d = mx - mn;
+    if (d) {
+      s = d / (1 - Math.abs(2 * l - 1));
+      if (mx === r) h = ((g - b) / d) % 6;
+      else if (mx === g) h = (b - r) / d + 2;
+      else h = (r - g) / d + 4;
+      h *= 60; if (h < 0) h += 360;
+    }
+    return [h, s, l];
   }
+
+  // 从调色板挑"主题色"：饱和度优先、亮度居中（避开近白/近黑/近灰的背景色）
+  function pickVibrant(palette) {
+    let best = null, bestScore = -1;
+    for (const rgb of palette || []) {
+      const [, s, l] = rgbToHsl(rgb);
+      const score = s * (1 - Math.abs(l - 0.5) * 2 * 0.6);
+      if (score > bestScore) { bestScore = score; best = rgb; }
+    }
+    return best ? '#' + best.map((v) => Math.round(v).toString(16).padStart(2, '0')).join('') : null;
+  }
+
+  // 用独立的 CORS Image 取色，和展示用 <img> 解耦，避免缓存混用导致的读取失败
+  function loadCorsImage(url) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => resolve(img);
+      img.onerror = reject;
+      img.src = url;
+    });
+  }
+
+  let themeSeq = 0; // 防止慢的旧请求覆盖新主题
+  async function themeFromUrl(url) {
+    const seq = ++themeSeq;
+    try {
+      const img = await loadCorsImage(url);
+      const palette = ct.getPalette(img, 8, 10);
+      const hex = pickVibrant(palette);
+      if (hex && seq === themeSeq) setAccent(hex);
+    } catch (e) { /* 跨域/读取失败：保持默认色 */ }
+  }
+
+  function fadeIn(e) { e.currentTarget.classList.add('loaded'); }
   function setAccent(hex) {
     document.documentElement.style.setProperty('--accent', hex);
     accent.set(hex);
@@ -87,7 +131,7 @@
     }
     showToast('已复制链接');
   }
-  function openLb(a) { lightbox = a; }
+  function openLb(a) { lightbox = a; themeFromUrl(cdn + a.path); }
   function closeLb() { lightbox = null; resetAccent(); }
   function randomPick() {
     if (!list.length) { showToast('当前筛选为空'); return; }
@@ -118,7 +162,7 @@
 
   <figure class="hero-fig" on:click={() => featured && openLb(featured)}>
     {#if featured}
-      <img src={cdn + featured.path} alt={featured.file} crossorigin="anonymous" on:load={(e) => themeFromImage(e.currentTarget)} />
+      <img src={cdn + featured.path} alt={featured.file} on:load={fadeIn} />
       <figcaption>
         <span class="fcat">{groupOf(featured.path)}{subOf(featured.path) ? ' · ' + subOf(featured.path) : ''}</span>
         <span class="fname">{nice(featured.file)}</span>
@@ -159,7 +203,7 @@
   {:else}
     {#each list as a (a.path)}
       <figure class="card" on:click={() => openLb(a)}>
-        <img src={cdn + a.path} alt={a.file} loading="lazy" decoding="async" />
+        <img src={cdn + a.path} alt={a.file} loading="lazy" decoding="async" on:load={fadeIn} />
         <figcaption class="cap">
           <div class="cap-text">
             <span class="ccat">{groupOf(a.path)}{subOf(a.path) ? ' · ' + subOf(a.path) : ''}</span>
@@ -180,7 +224,7 @@
   <div class="lb" on:click={closeLb}>
     <div class="panel" on:click|stopPropagation>
       <button class="x" on:click={closeLb}>✕</button>
-      <div class="imgwrap"><img src={cdn + lightbox.path} alt={lightbox.file} crossorigin="anonymous" on:load={(e) => themeFromImage(e.currentTarget)} /></div>
+      <div class="imgwrap"><img src={cdn + lightbox.path} alt={lightbox.file} on:load={fadeIn} /></div>
       <div class="meta">
         <p class="mcat">{groupOf(lightbox.path)}{subOf(lightbox.path) ? ' · ' + subOf(lightbox.path) : ''}</p>
         <h2>{nice(lightbox.file)}</h2>
@@ -308,6 +352,11 @@
   color: var(--text); font-size: 0.7rem; font-weight: 600; backdrop-filter: blur(6px); transition: 0.15s;
 }
 .actions button:hover { border-color: var(--accent); color: var(--accent); }
+/* 图片淡入（避免加载期看起来像"黑的/没显示"） */
+.hero-fig img, .card img, .imgwrap img { opacity: 0; transition: opacity 0.5s ease, transform 0.5s ease; }
+.hero-fig img.loaded, .card img.loaded, .imgwrap img.loaded { opacity: 1; }
+.card img { background: var(--bg2); }
+
 .empty { grid-column: 1 / -1; text-align: center; color: var(--faint); padding: 70px 0; }
 
 /* ============ LIGHTBOX ============ */
