@@ -17,3 +17,4 @@ site/dist/
 site/.astro/
 site/.vite/
 site/.pnpm-store/
+.workbuddy/

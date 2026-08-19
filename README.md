@@ -8,7 +8,7 @@
 
 - **按审美主题分类，不按来源 / 时间 / 年份分类。** 年份目录（`2024/`、`2025/`…）几年后会很难找，只适合摄影归档或项目版本，不适合壁纸。
 - **内容与用途分离。** `wallpapers/` 是收藏，`generated/` 是自行生成，`icons/`、`covers/` 是其它用途资产。
-- **一切皆可索引。** 每张图的元数据是其**同目录**下的同名 `.json` sidecar，可被 `tools/gen_index.py` 扫描全树汇总成 `metadata/index.json`。
+- **一切皆可索引。** 每张图的元数据是其**同目录**下的同名 `.json` sidecar，可被 TS 脚本 `site/scripts/gen-index.ts` 扫描汇总成 `metadata/index.json`。
 - **命名即检索。** 文件名本身就是最强索引，无需打开文件就能知道内容。
 
 ## 目录结构
@@ -146,10 +146,10 @@ oriental-mountain-mist-260812.webp
 ## 生成索引
 
 ```bash
-python tools/gen_index.py
+cd site && pnpm gen:index
 ```
 
-脚本会扫描全仓库的图片，查找每张图**同目录**下的同名 `.json` sidecar（自动跳过 `index.json` / `docs` / `site` / `node_modules` / `tools` / `metadata` 等目录），汇总生成 `metadata/index.json`，包含 `count` 与 `assets` 数组。若环境装有 Pillow，会自动补全每张图的真实宽高与比例。
+TS 脚本 `site/scripts/gen-index.ts`（Node 22 原生直跑 `--experimental-strip-types`，无需额外 runner）扫描 `wallpapers/` `generated/` `icons/` `covers/` 下的图片，读取每张图**同目录**的同名 `.json` sidecar，汇总成索引（含 `count` 与 `assets`），并同时写三处：`metadata/index.json`（规范索引，wallpaper-api 用）、`site/public/assets/index.json`（站点数据源：打进每次构建、`astro dev` 直接可用）、`docs/assets/index.json`（已构建站点免重构建即可更新数据）。若安装了 `image-size`（devDependency）会自动补全真实宽高与比例。
 
 思源插件未来即可基于 `index.json` 实现：
 
@@ -175,7 +175,7 @@ PORT=8787 node tools/wallpaper-api/server.mjs
 
 1. 放进正确的主题目录，按命名规范改名。
 2. 在图片**同目录**写一份同名 `<name>.json`（sidecar）。
-3. 跑 `python tools/gen_index.py` 更新索引。
+3. 跑 `cd site && pnpm gen:index` 更新索引。
 4. 提交。
 
 > **改名 / 移动提醒**：移动整个文件夹时 sidecar 跟着走，无需改动；但**改名图片**必须同步改同目录 `.json` 的文件名及其内部 `file` / `path` 字段，建议用脚本原子处理（如 `tools/rename_asset.py`）。

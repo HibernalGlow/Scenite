@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "preview": "astro preview"
+    "preview": "astro preview",
+    "gen:index": "node --experimental-strip-types scripts/gen-index.ts"
   },
   "dependencies": {
     "@astrojs/svelte": "^9.0.1",
@@ -14,5 +15,8 @@
     "fast-average-color": "^9.4.0",
     "svelte": "^5.56.9",
     "three": "^0.185.1"
+  },
+  "devDependencies": {
+    "image-size": "^2.0.2"
   }
 }

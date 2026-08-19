@@ -24,8 +24,12 @@ from datetime import datetime, timezone, timedelta
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 META_DIR = os.path.join(ROOT, "metadata")
 INDEX_PATH = os.path.join(META_DIR, "index.json")
-# 同源副本，供 GitHub Pages 站点实时读取（避开 jsDelivr 缓存）
+# 站点数据源：会被打进每次构建、并在 astro dev 下直接可用。
+# 关键——缺了它，dev / 全新构建的图库都没有数据（看不到图）。
+PUBLIC_INDEX_PATH = os.path.join(ROOT, "site", "public", "assets", "index.json")
+# 已构建站点的同源副本（数据更新时免重新构建）
 DOCS_INDEX_PATH = os.path.join(ROOT, "docs", "assets", "index.json")
+OUTPUTS = (INDEX_PATH, PUBLIC_INDEX_PATH, DOCS_INDEX_PATH)
 
 # 不扫描的目录（依赖、生成的站点、脚本自身、旧/生成的元数据目录）
 EXCLUDE_DIRS = {".git", ".workbuddy", "node_modules", "site", "docs", "tools", "metadata"}
@@ -108,16 +112,15 @@ def main():
         "count": len(assets),
         "assets": assets,
     }
-    os.makedirs(META_DIR, exist_ok=True)
-    with open(INDEX_PATH, "w", encoding="utf-8") as f:
-        json.dump(index, f, ensure_ascii=False, indent=2)
+    for path in OUTPUTS:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(index, f, ensure_ascii=False, indent=2)
 
-    os.makedirs(os.path.dirname(DOCS_INDEX_PATH), exist_ok=True)
-    with open(DOCS_INDEX_PATH, "w", encoding="utf-8") as f:
-        json.dump(index, f, ensure_ascii=False, indent=2)
-
-    note = " (with real dimensions)" if HAVE_PIL else " (Pillow not installed: dimensions skipped)"
-    print(f"wrote {INDEX_PATH} and {DOCS_INDEX_PATH} with {len(assets)} asset(s){note}")
+    note = "with real dimensions" if HAVE_PIL else "Pillow not installed: dimensions skipped"
+    print(f"wrote {len(assets)} asset(s) ({note}) to:")
+    for path in OUTPUTS:
+        print("  " + os.path.relpath(path, ROOT).replace(os.sep, "/"))
 
 
 if __name__ == "__main__":
