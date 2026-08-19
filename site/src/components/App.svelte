@@ -1,5 +1,7 @@
 <script>
   import { onMount } from 'svelte';
+  import { FastAverageColor } from 'fast-average-color';
+  import { accent, DEFAULT_ACCENT } from '../lib/theme.js';
 
   export let base = '/';
   export let data = '';
@@ -52,6 +54,25 @@
     loading = false;
   });
 
+  // —— 主题色提取（fast-average-color，成熟库，不手搓）——
+  let fac;
+  function getFac() { if (!fac) fac = new FastAverageColor(); return fac; }
+  async function themeFromImage(img) {
+    if (!img) return;
+    try {
+      const c = await getFac().getColorAsync(img, { algorithm: 'dominant' });
+      setAccent(c.hex);
+    } catch (e) { /* 跨域/读取失败时保持默认色 */ }
+  }
+  function setAccent(hex) {
+    document.documentElement.style.setProperty('--accent', hex);
+    accent.set(hex);
+  }
+  function resetAccent() {
+    document.documentElement.style.setProperty('--accent', DEFAULT_ACCENT);
+    accent.set(DEFAULT_ACCENT);
+  }
+
   function showToast(msg) {
     toastMsg = msg;
     clearTimeout(toastTimer);
@@ -67,7 +88,7 @@
     showToast('已复制链接');
   }
   function openLb(a) { lightbox = a; }
-  function closeLb() { lightbox = null; }
+  function closeLb() { lightbox = null; resetAccent(); }
   function randomPick() {
     if (!list.length) { showToast('当前筛选为空'); return; }
     openLb(list[Math.floor(Math.random() * list.length)]);
@@ -97,7 +118,7 @@
 
   <figure class="hero-fig" on:click={() => featured && openLb(featured)}>
     {#if featured}
-      <img src={cdn + featured.path} alt={featured.file} />
+      <img src={cdn + featured.path} alt={featured.file} crossorigin="anonymous" on:load={(e) => themeFromImage(e.currentTarget)} />
       <figcaption>
         <span class="fcat">{groupOf(featured.path)}{subOf(featured.path) ? ' · ' + subOf(featured.path) : ''}</span>
         <span class="fname">{nice(featured.file)}</span>
@@ -159,7 +180,7 @@
   <div class="lb" on:click={closeLb}>
     <div class="panel" on:click|stopPropagation>
       <button class="x" on:click={closeLb}>✕</button>
-      <div class="imgwrap"><img src={cdn + lightbox.path} alt={lightbox.file} /></div>
+      <div class="imgwrap"><img src={cdn + lightbox.path} alt={lightbox.file} crossorigin="anonymous" on:load={(e) => themeFromImage(e.currentTarget)} /></div>
       <div class="meta">
         <p class="mcat">{groupOf(lightbox.path)}{subOf(lightbox.path) ? ' · ' + subOf(lightbox.path) : ''}</p>
         <h2>{nice(lightbox.file)}</h2>
@@ -290,7 +311,14 @@
 .empty { grid-column: 1 / -1; text-align: center; color: var(--faint); padding: 70px 0; }
 
 /* ============ LIGHTBOX ============ */
-.lb { position: fixed; inset: 0; z-index: 80; background: rgba(4, 5, 9, 0.84); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; padding: 26px; }
+.lb {
+  position: fixed; inset: 0; z-index: 80; display: flex; align-items: center; justify-content: center; padding: 26px;
+  background:
+    radial-gradient(60% 60% at 50% 46%, color-mix(in srgb, var(--accent) 20%, transparent), transparent 72%),
+    rgba(4, 5, 9, 0.86);
+  backdrop-filter: blur(10px);
+  transition: background 0.6s ease;
+}
 .panel {
   position: relative; width: 100%; max-width: 1040px; max-height: 88vh;
   display: grid; grid-template-columns: 1.55fr 1fr; background: var(--bg2);

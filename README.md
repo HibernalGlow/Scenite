@@ -8,7 +8,7 @@
 
 - **按审美主题分类，不按来源 / 时间 / 年份分类。** 年份目录（`2024/`、`2025/`…）几年后会很难找，只适合摄影归档或项目版本，不适合壁纸。
 - **内容与用途分离。** `wallpapers/` 是收藏，`generated/` 是自行生成，`icons/`、`covers/` 是其它用途资产。
-- **一切皆可索引。** 每张图配套一份 `metadata/<name>.json`，可被 `tools/gen_index.py` 汇总成 `metadata/index.json`。
+- **一切皆可索引。** 每张图的元数据是其**同目录**下的同名 `.json` sidecar，可被 `tools/gen_index.py` 扫描全树汇总成 `metadata/index.json`。
 - **命名即检索。** 文件名本身就是最强索引，无需打开文件就能知道内容。
 
 ## 目录结构
@@ -37,7 +37,7 @@ Scenite/
 │   └── selected/          # 精选 / 二筛
 ├── icons/                 # 图标素材
 ├── covers/                # 封面 / 缩略 / 卡片底图
-├── metadata/              # 元数据（每张图一份 <name>.json + 汇总 index.json）
+├── metadata/              # 仅存放脚本生成的汇总 index.json（每张图的元数据是其同目录下的同名 .json sidecar）
 └── tools/                 # 索引生成 / 随机切换等脚本
 ```
 
@@ -72,7 +72,7 @@ oriental-mountain-mist-260812.webp
 
 ## 元数据规范
 
-每张图在 `metadata/` 下配一份同名 JSON（`metadata/arknights-endfield-rossi-260819.json`）：
+每张图在**图片同目录**下放一份同名 JSON sidecar（`wallpapers/game/arknights-endfield/arknights-endfield-rossi-260819.json`，与 `.avif` 并列）：
 
 ```json
 {
@@ -80,19 +80,32 @@ oriental-mountain-mist-260812.webp
   "path": "wallpapers/game/arknights-endfield/arknights-endfield-rossi-260819.avif",
   "tags": [
     "game",
-    "copyright:arknights",
-    "copyright:endfield",
-    "character:rossi",
     "cg",
     "blue",
-    "meta:collected"
+    "meta:collected",
+    "copyright:arknights",
+    "copyright:arknights_endfield",
+    "character:rossi",
+    "artist:yukuso",
+    "meta:official_art",
+    "blonde_hair",
+    "long_hair",
+    "wolf_ears",
+    "yellow_eyes",
+    "white_dress",
+    "hooded_cape",
+    "looking_at_viewer",
+    "solo"
   ],
   "usage": ["siyuan", "desktop"],
   "ratio": "",
   "source": "collected",
+  "source_url": "https://danbooru.donmai.us/posts/11049666",
   "notes": "洛茜角色潜能CG图，来自《明日方舟：终末地》(Arknights: Endfield)。归入 game 而非 anime。"
 }
 ```
+
+> 示例为节选；完整 Danbooru 标签（含 `animal_ears` / `blue_apple` / `red_cape` 等 40+ 项）见图片同目录下的 `arknights-endfield-rossi-260819.json` 本体。
 
 ### Tag 体系（Danbooru 风格）
 
@@ -117,15 +130,18 @@ oriental-mountain-mist-260812.webp
 
 字段说明：
 
-| 字段     | 含义                                                         |
-| -------- | ------------------------------------------------------------ |
-| `file`   | 文件名                                                       |
-| `path`   | 相对仓库根的路径                                             |
-| `tags`   | 检索标签（Danbooru 风格：命名空间 + general）                |
-| `usage`  | 用途：`siyuan` / `desktop` / `mobile` / `xiranite` / `cover` |
-| `ratio`  | 比例：`16:9` / `9:16` / `4:3` / `1:1`                        |
-| `source` | 来源：`original` / `ai` / `collected`                       |
-| `notes`  | 备注                                                         |
+| 字段        | 含义                                                         |
+| ----------- | ------------------------------------------------------------ |
+| `file`      | 文件名                                                       |
+| `path`      | 相对仓库根的路径                                             |
+| `tags`      | 检索标签（Danbooru 风格：命名空间 + general）                |
+| `usage`     | 用途：`siyuan` / `desktop` / `mobile` / `xiranite` / `cover` |
+| `ratio`     | 比例：`16:9` / `9:16` / `4:3` / `1:1`                        |
+| `source`    | 来源：`original` / `ai` / `collected`                       |
+| `source_url`| 原图出处链接（如 Danbooru / Pixiv post），便于溯源           |
+| `notes`     | 备注                                                         |
+
+> **溯源**：若原图来自 Danbooru / Pixiv 等，把 post 链接填进 `source_url`，并把站点的原始标签按上述命名空间映射后并入 `tags`（Artist→`artist:`、Copyrights→`copyright:`、Character→`character:`、Meta→`meta:`、General→无前缀）。多词标签统一转下划线。
 
 ## 生成索引
 
@@ -133,7 +149,7 @@ oriental-mountain-mist-260812.webp
 python tools/gen_index.py
 ```
 
-脚本会扫描 `metadata/*.json`（跳过 `index.json`），汇总生成 `metadata/index.json`，包含 `count` 与 `assets` 数组。若环境装有 Pillow，会自动补全每张图的真实宽高与比例。
+脚本会扫描全仓库的图片，查找每张图**同目录**下的同名 `.json` sidecar（自动跳过 `index.json` / `docs` / `site` / `node_modules` / `tools` / `metadata` 等目录），汇总生成 `metadata/index.json`，包含 `count` 与 `assets` 数组。若环境装有 Pillow，会自动补全每张图的真实宽高与比例。
 
 思源插件未来即可基于 `index.json` 实现：
 
@@ -158,6 +174,8 @@ PORT=8787 node tools/wallpaper-api/server.mjs
 ## 贡献流程（给自己）
 
 1. 放进正确的主题目录，按命名规范改名。
-2. 在 `metadata/` 写一份同名 JSON。
+2. 在图片**同目录**写一份同名 `<name>.json`（sidecar）。
 3. 跑 `python tools/gen_index.py` 更新索引。
 4. 提交。
+
+> **改名 / 移动提醒**：移动整个文件夹时 sidecar 跟着走，无需改动；但**改名图片**必须同步改同目录 `.json` 的文件名及其内部 `file` / `path` 字段，建议用脚本原子处理（如 `tools/rename_asset.py`）。
