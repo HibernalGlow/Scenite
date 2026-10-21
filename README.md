@@ -117,7 +117,7 @@ oriental-mountain-mist-260812.webp
 | `copyright:`| copyright (3)   | 系列 / IP / 作品 / 版权方             | `copyright:arknights` `copyright:fate` `copyright:genshin` `copyright:evangelion` |
 | `character:`| character (4)   | 角色                                  | `character:rossi` `character:saber` `character:hutao`                      |
 | `artist:`   | artist (1)      | 原画师 / 创作者（AI 生成填 `artist:ai`） | `artist:someone` `artist:ai`                                            |
-| `meta:`     | meta (5)        | 分级 / 来源 / 检索辅助                | `meta:safe` `meta:nsfw` `meta:collected` `meta:ai` `meta:original`        |
+| `meta:`     | meta (5)        | 分级 / 来源 / 检索辅助                | `meta:safe` `meta:restricted` `meta:collected` `meta:ai` `meta:original`        |
 
 约定：
 
